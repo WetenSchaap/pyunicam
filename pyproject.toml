@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "pyunicam"
+version = "0.1.0"
+description = "Pyunicam is a Python module to control (scientific) cameras using a universal Python interface"
+authors = ["Piet J.M. Swinkels <36634689+WetenSchaap@users.noreply.github.com>"]
+readme = "README.md"
+repository = "https://github.com/WetenSchaap/pyunicam"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numpy = "^1.22"
+ipykernel = { version = "*", optional = true }
+simple-pyspin = { version = "^0.1.1", optional = true }
+
+[tool.poetry.extras]
+zaber = ["simple-pyspin"]
+test = ["ipykernel"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
