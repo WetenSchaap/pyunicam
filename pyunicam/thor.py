@@ -1,6 +1,7 @@
 import time
 from .universal import *
 import threading
+import warnings
 
 class ThorCam(UniversalCam):
     def __init__(self):
@@ -131,13 +132,12 @@ class ThorCam(UniversalCam):
             # keep things on auto as expected.
             self.propertyConvert["acquisitionFramerateAuto"] = True
             self.propertyConvert["acquisitionFramerate"] = 1 / self.camConnection.frame_time_us
-        elif value > minfps:
-            raise NotImplementedError("Since framerate setting is not really supported by the Thorcam, I need to use a custom hack. It does not work for high framerates. But you can force it anway if you really really want to try, by setting the treshold value in the code. Weird timings etc to be expected!")
         else:
             # Take into account exposuretime, etc.
             self.propertyConvert["acquisitionFramerateAuto"] = False 
             self.propertyConvert["acquisitionFramerate"] = value
-
+            if value > minfps:
+                warnings.warn("Since framerate setting is not really supported by the Thorcam, I need to use a custom hack. It does not work for high framerates. I detect you are probably using a potentially too high framerate, but i will continue anyway.")
     def _thor_capture_with_framerate(self):
         time_per_loop = 1 / self.propertyConvert["acquisitionFramerate"]
         self.camConnection.frames_per_trigger_zero_for_unlimited = 0
