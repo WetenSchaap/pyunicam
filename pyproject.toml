@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyunicam"
-version = "0.1.0"
+version = "0.1.1"
 description = "Pyunicam is a Python module to control (scientific) cameras using a universal Python interface"
 authors = ["Piet J.M. Swinkels <36634689+WetenSchaap@users.noreply.github.com>"]
 readme = "README.md"
