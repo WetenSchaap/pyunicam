@@ -30,9 +30,13 @@ class UniversalCam(object):
                 self.setProperty('pixelFormat','BGR8')
             except:
                 print(f"Warning, pixelformat is Bayer patterned ('{self.getProperty('pixelFormat')}')!")
-        if self.getProperty('gammaEnable'):
-            # We are doing science, not making pretty pictures. Disable by default
-            self.setProperty('gammaEnable',False)
+        # We are doing science, not making pretty pictures, so diable Gamma by default
+        try:
+            if self.getProperty('gammaEnable'):
+                self.setProperty('gammaEnable',False)
+        except NotImplementedError:
+            # if camera does not support it, we are also statisfied
+            pass
 
     def __enter__(self):
         return self
@@ -79,6 +83,7 @@ class UniversalCam(object):
         """
         if not (prop in self.AVAILABLE_PROPERTIES):
             raise NotImplementedError(f"the property '{prop}' is not implemented (or you made a spelling error). Available properties are listed below: \n{self.AVAILABLE_PROPERTIES}")
+        setValue = self.getProperty(prop) # To trigger any errors while not writing, just as a precaution
         self._setPropertyDeep(prop,value)
         # Now check if anything was actually set, and throw error if not. Needs some leeway, since some values (but not all) are some hexadecimal thing, so will not be set *exactly* (12 may become 12.02 or something)
         setValue = self.getProperty(prop)

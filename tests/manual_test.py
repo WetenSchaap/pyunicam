@@ -14,7 +14,7 @@ print(f'max px value is {np.max(d)}')
 # %%
 print(c.getProperty('exposureTime'))
 # %%
-c.setProperty('exposureTime',100000)
+c.setProperty('exposureTime',33303)
 # %%
 d= c.takeOneImage()
 plt.imshow(d)

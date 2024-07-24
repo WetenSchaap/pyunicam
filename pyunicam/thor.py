@@ -1,3 +1,4 @@
+from numbers import Number
 import time
 from .universal import *
 import threading
@@ -21,14 +22,14 @@ class ThorCam(UniversalCam):
         allCams = self.thorConnectSDK.discover_available_cameras()
         self.camConnection = self.thorConnectSDK.open_camera(allCams[0]) # I simply assume there is only 1 camera attached. Fuck me if that is not the case.
         self.propertyConvert = {
-            "exposureTime" : self.camConnection.exposure_time_us,
+            "exposureTime" : 'exposure_time_us',
             "exposureTimeAuto" : "Not implemented",
-            "acquisitionFramerate" :  "Not implemented",
+            "acquisitionFramerate" : "special",
             "acquisitionFramerateAuto" : True,
-            "gain" : "Not implemented",
+            "gain" : "gain",
             "gainAuto": "Not implemented",
-            "height" : self.camConnection.image_height_pixels,
-            "width" : self.camConnection.image_width_pixels,
+            "height" : 'sensor_height_pixels',
+            "width" : 'sensor_width_pixels',
             'pixelFormat' : 'grayscale',
             'gammaEnable' : "Not implemented",
             'gamma' : 'Not implemented',
@@ -117,12 +118,36 @@ class ThorCam(UniversalCam):
             raise NotImplementedError("Automated setting of properties is not implented in the thorcam")
         if prop == "acquisitionFramerate":
             self._thor_framerate_setter(value)
-        if value == -1:
-            # Just set a random value, since we need to do something to prevent a crash
-            # I do not understand this note? What crash would it cause?
-            self.propertyConvert[prop] = 1000
         else:
-            self.propertyConvert[prop] = value
+            thorname_of_property = self._get_real_property_name(prop)
+            if value == -1:
+                # Just set a random value, since we need to do something to prevent a crash
+                self.camConnection.__setattr__(thorname_of_property,1000)
+            else:
+                self.camConnection.__setattr__(thorname_of_property,value)
+
+    def _getPropertyDeep(self, prop: str) -> str | bool | Number:
+        thor_prop_name = self._get_real_property_name(prop)
+        # if thor_prop_name in ('special', True, False) or prop in ('acquisitionFramerate'):
+        #     return thor_prop_name
+        try:
+            return self.camConnection.__getattribute__(str(thor_prop_name))
+        except self.thorlabs_tsi_sdk.tl_camera.TLCameraError as e:
+            raise NotImplementedError(repr(e))
+        except AttributeError as e:
+            if prop in ('pixelFormat','acquisitionFramerate','acquisitionFramerateAuto'): # weird cases can go here
+                return self.propertyConvert[prop]
+            else:
+                raise e
+
+    def _get_real_property_name(self, prop : str) -> str:
+        try:
+            thorname_of_property = self.propertyConvert[prop]
+        except KeyError:
+            raise KeyError(f'property {prop} does not exist for Thor cameras, or is not implemented')
+        if thorname_of_property == "Not implemented":
+            raise NotImplementedError(f'property {prop} is not implemented in the hardware of this Thor camera')
+        return thorname_of_property
 
     def _thor_framerate_setter(self, value : float, minfps=1):
         '''
@@ -138,6 +163,7 @@ class ThorCam(UniversalCam):
             self.propertyConvert["acquisitionFramerate"] = value
             if value > minfps:
                 warnings.warn("Since framerate setting is not really supported by the Thorcam, I need to use a custom hack. It does not work for high framerates. I detect you are probably using a potentially too high framerate, but i will continue anyway.")
+
     def _thor_capture_with_framerate(self):
         time_per_loop = 1 / self.propertyConvert["acquisitionFramerate"]
         self.camConnection.frames_per_trigger_zero_for_unlimited = 0
