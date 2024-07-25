@@ -42,6 +42,9 @@ class ThorCam(UniversalCam):
         self.thorConnectSDK.dispose()
 
     def startCapture(self):
+        """
+        Start capturing images with camera. This function is non-blocking. Images that are captured need to be collected using self.getImages function. Stop collection with self.stopCapture.
+        """
         if self.propertyConvert["acquisitionFramerateAuto"]:
             self.camConnection.frames_per_trigger_zero_for_unlimited = 0
             self.camConnection.arm(frames_to_buffer = 100)
@@ -54,6 +57,9 @@ class ThorCam(UniversalCam):
             self.thorCaptureThread.start()
 
     def stopCapture(self):
+        """
+        Stop capturing images with camera (when started with self.startCapture). Images that are captured need to be collected using the self.getImages function.
+        """
         if self.propertyConvert["acquisitionFramerateAuto"]:
             self.camConnection.disarm()
         else:
@@ -61,7 +67,24 @@ class ThorCam(UniversalCam):
             self.thorCaptureThread.join()
             self.camConnection.disarm()
     
-    def getImages(self) -> list[np.ndarray]:
+    def getImages(self) -> np.ndarray:
+        """
+        Return images captured by a capturing camera (see self.startCapture). Data is always returned as a numpy array. Every time you call this function, you receive one (1) image. This function blocks execution until an image appears in the camera buffer.
+
+        Returns
+        -------
+        np.ndarray
+            Captured image in a numpy array.
+
+        Example
+        ------
+        To take a movie of 20 frames, run:
+        
+        c = pyunicam.connect_cam('thor')
+        c.startCapture()
+        imgs = [ (c.getImages(),time.time()) for frame in range(20)]
+        c.stopCapture()
+        """
         if self.propertyConvert["acquisitionFramerateAuto"]:
             while True:
                 try:
@@ -149,9 +172,9 @@ class ThorCam(UniversalCam):
             raise NotImplementedError(f'property {prop} is not implemented in the hardware of this Thor camera')
         return thorname_of_property
 
-    def _thor_framerate_setter(self, value : float, minfps=1):
+    def _thor_framerate_setter(self, value : float, minfps=5):
         '''
-        Enforce a framerate on the Thor camera. This is //not// natively supported, and a hack. You should only do this if the exposure time is quite a bit shorter than the fps you want to reach. My gut feeling says 1 fps is the approx cutoff, faster than that > play with exposure times! Set minfps explicitly if you want to ignore this limit.
+        Enforce a framerate on the Thor camera. This is //not// natively supported, and a hack. You should only do this if the exposure time is quite a bit shorter than the fps you want to reach. My gut feeling says 5 fps is the approx cutoff, faster than that > play with exposure times! Set minfps explicitly if you want to ignore warnings about this.
         '''
         if value == -1:
             # keep things on auto as expected.
@@ -165,6 +188,7 @@ class ThorCam(UniversalCam):
                 warnings.warn("Since framerate setting is not really supported by the Thorcam, I need to use a custom hack. It does not work for high framerates. I detect you are probably using a potentially too high framerate, but i will continue anyway.")
 
     def _thor_capture_with_framerate(self):
+        """Capture a video with a set framerate, by sleeping between taking images manually. Gathered images are written to the self.thorCaptureImageCache, and can be accessed using the self.getImages function"""
         time_per_loop = 1 / self.propertyConvert["acquisitionFramerate"]
         self.camConnection.frames_per_trigger_zero_for_unlimited = 0
         self.camConnection.arm(frames_to_buffer = 100)

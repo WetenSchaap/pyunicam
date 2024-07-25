@@ -74,6 +74,20 @@ class UniversalCam(object):
     def getImages(self) -> np.ndarray:
         """
         Return images captured by a capturing camera (see startCapture). Data is always returned as a numpy array. Every time you call this function, you receive one (1) image. You continue until no images are left to collect.
+        
+        Returns
+        -------
+        np.ndarray
+            Captured image in a numpy array.
+
+        Example
+        ------
+        To take a movie of 20 frames, run:
+        
+        c = pyunicam.connect_cam('thor')
+        c.startCapture()
+        imgs = [ (c.getImages(),time.time()) for frame in range(20)]
+        c.stopCapture()
         """
         return np.random.randint(low=0,high=255,size=[500,500,3],dtype=np.uint8) # dummy data that looks like an image.
 
