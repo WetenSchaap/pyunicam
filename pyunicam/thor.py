@@ -21,6 +21,7 @@ class ThorCam(UniversalCam):
         self.thorConnectSDK = self.thorlabs_tsi_sdk.tl_camera.TLCameraSDK()
         allCams = self.thorConnectSDK.discover_available_cameras()
         self.camConnection = self.thorConnectSDK.open_camera(allCams[0]) # I simply assume there is only 1 camera attached. Fuck me if that is not the case.
+        self.test_connection()
         self.propertyConvert = {
             "exposureTime" : 'exposure_time_us',
             "exposureTimeAuto" : "Not implemented",
@@ -34,6 +35,16 @@ class ThorCam(UniversalCam):
             'gammaEnable' : "Not implemented",
             'gamma' : 'Not implemented',
         }
+    
+    def test_connection(self) -> bool:
+        """
+        The Thorlabs SDK will not error out when the camera is not actually connected,
+        so manually check if it is connected here.
+        """
+        try:
+            md = self.getMetadata()
+        except self.thorlabs_tsi_sdk.tl_camera.TLCameraError:
+            raise ConnectionError("Thorcam is not connected")
 
     def close(self):
         self.stopCapture()
