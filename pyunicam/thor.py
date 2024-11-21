@@ -38,7 +38,7 @@ class ThorCam(UniversalCam):
     def close(self):
         self.stopCapture()
         self.camConnection.dispose()
-        time.sleep(0.01)
+        time.sleep(0.1) # give it some time to *actually* break the connection.
         self.thorConnectSDK.dispose()
 
     def startCapture(self):
@@ -61,12 +61,19 @@ class ThorCam(UniversalCam):
         Stop capturing images with camera (when started with self.startCapture). Images that are captured need to be collected using the self.getImages function.
         """
         if self.propertyConvert["acquisitionFramerateAuto"]:
-            self.camConnection.disarm()
+            try:
+                self.camConnection.disarm()
+            except self.thorlabs_tsi_sdk.tl_camera.TLCameraError:
+                # camera is not connected > could happen during shutdown > ignore
+                pass
         else:
             self.killThorCaptureThread.set()
             self.thorCaptureThread.join()
-            self.camConnection.disarm()
-    
+            try:
+                self.camConnection.disarm()
+            except self.thorlabs_tsi_sdk.tl_camera.TLCameraError:
+                pass
+
     def getImages(self) -> np.ndarray:
         """
         Return images captured by a capturing camera (see self.startCapture). Data is always returned as a numpy array. Every time you call this function, you receive one (1) image. This function blocks execution until an image appears in the camera buffer.

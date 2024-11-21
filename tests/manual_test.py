@@ -30,3 +30,4 @@ c.startCapture()
 imgs = [ (c.getImages(),time.time()) for frame in range(20)] 
 c.stopCapture()
 # %%
+c.close()

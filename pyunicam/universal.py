@@ -3,6 +3,7 @@ Universal class for controlling cameras. All camera classes inherit from this ov
 """
 import numpy as np
 import numbers
+import time
 
 class UniversalCam(object):
     def __init__(self):
