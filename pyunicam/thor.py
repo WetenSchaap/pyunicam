@@ -133,7 +133,7 @@ class ThorCam(UniversalCam):
         }
         return cameraMetadata
 
-    def _setPropertyDeep(self, prop : str, value : str|bool|numbers.Number):
+    def _setPropertyDeep(self, prop : str, value : str|bool|Number):
         '''
         Set Thor camera properties. Note that only very few properties can actually be set.
         '''
@@ -194,7 +194,7 @@ class ThorCam(UniversalCam):
         self.camConnection.arm(frames_to_buffer = 100)
         while not self.killThorCaptureThread.is_set():
             looptimes = time.time()
-            # take pic, add to cache         
+            # take pic, add to cache
             self.camConnection.issue_software_trigger()
             # need to pause, how long is unknown a priori.
             while True:
@@ -210,4 +210,4 @@ class ThorCam(UniversalCam):
             try:
                 time.sleep(time_per_loop - looptime)
             except ValueError:
-                raise ValueError(f"framerate is set to fast, data collection cannot keep up! Time of one loop is: {looptime} s, while desired looptime is {time_per_loop} s.")
+                raise ValueError(f"framerate is set too fast, data collection cannot keep up! Time of one loop is: {looptime} s, while desired looptime is {time_per_loop} s.")
