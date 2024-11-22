@@ -72,8 +72,8 @@ class ThorCam(UniversalCam):
         Stop capturing images with camera (when started with self.startCapture). Images that are captured need to be collected using the self.getImages function.
         """
         if self.propertyConvert["acquisitionFramerateAuto"]:
-            try:
-                self.camConnection.disarm()
+            # try:
+            self.camConnection.disarm()
             #except self.thorlabs_tsi_sdk.tl_camera.TLCameraError:
                 # camera is not connected > could happen during shutdown > ignore
             #    pass
