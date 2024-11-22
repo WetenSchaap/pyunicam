@@ -74,9 +74,9 @@ class ThorCam(UniversalCam):
         if self.propertyConvert["acquisitionFramerateAuto"]:
             try:
                 self.camConnection.disarm()
-            except self.thorlabs_tsi_sdk.tl_camera.TLCameraError:
+            #except self.thorlabs_tsi_sdk.tl_camera.TLCameraError:
                 # camera is not connected > could happen during shutdown > ignore
-                pass
+            #    pass
         else:
             self.killThorCaptureThread.set()
             self.thorCaptureThread.join()
@@ -128,6 +128,7 @@ class ThorCam(UniversalCam):
         """
         Take a single image using the camera. This is mostly just a convenience function.
         """
+        self.test_connection()
         self.camConnection.frames_per_trigger_zero_for_unlimited = 0 # Without this, it will not work...
         self.camConnection.arm(frames_to_buffer = 2)
         self.camConnection.issue_software_trigger()
@@ -155,6 +156,7 @@ class ThorCam(UniversalCam):
         '''
         Set Thor camera properties. Note that only very few properties can actually be set.
         '''
+        self.test_connection()
         if 'Auto' in prop:
             raise NotImplementedError("Automated setting of properties is not implented in the thorcam")
         if prop == "acquisitionFramerate":
@@ -168,6 +170,7 @@ class ThorCam(UniversalCam):
                 self.camConnection.__setattr__(thorname_of_property,value)
 
     def _getPropertyDeep(self, prop: str) -> str | bool | Number:
+        self.test_connection()
         thor_prop_name = self._get_real_property_name(prop)
         # if thor_prop_name in ('special', True, False) or prop in ('acquisitionFramerate'):
         #     return thor_prop_name
