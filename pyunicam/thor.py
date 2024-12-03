@@ -38,7 +38,7 @@ class ThorCam(UniversalCam):
     
     def test_connection(self) -> bool:
         """
-        The Thorlabs SDK will not error out when the camera is not actually connected,
+        The Thorlabs SDK will not always error out when the camera is not actually connected,
         so manually check if it is connected here.
         """
         try:
