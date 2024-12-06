@@ -76,10 +76,10 @@ class ThorCam(UniversalCam):
         else:
             try:
                 self.killThorCaptureThread.set()
+                self.thorCaptureThread.join()
             except AttributeError:
                 self.killThorCaptureThread = threading.Event()
                 self.killThorCaptureThread.set()
-            self.thorCaptureThread.join()
             try:
                 self.camConnection.disarm()
             except self.thorlabs_tsi_sdk.tl_camera.TLCameraError:
