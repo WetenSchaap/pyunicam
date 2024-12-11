@@ -147,7 +147,7 @@ class UniversalCam(object):
         """
         Function that actually sets a property is set using setProperty. setProperty just does input checking etc, the real nitty-gritty happens here.
         """
-        pass
+        self.propertyConvert[prop] = value
 
     def _getPropertyDeep(self, prop : str) -> str|bool|numbers.Number:
         """
